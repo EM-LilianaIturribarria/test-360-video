@@ -23,11 +23,11 @@
       controllerAs: 'vm',
       link: link,
       scope:{
+        videoSrc: '@',
         video : '=',
         api:'=' // [@]String, [=]Object, [&]Expression to evaluate using parent scope.
       },
-      replace: true,
-      transclude: true
+      replace: true
     };
 
     function link(scope, element, attrs) {

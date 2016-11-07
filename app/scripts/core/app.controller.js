@@ -22,7 +22,6 @@
     var vm = this;
     vm.app = {
       ready: false,
-      type: CONFIG.settings.type,
       videojs : {
         ended: false,
         api: {

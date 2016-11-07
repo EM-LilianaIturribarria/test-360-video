@@ -92,9 +92,7 @@
         ]
       },
 
-      'settings': {
-        'type' : 'video'
-      }
+      'settings': {}
 
     });
   }
