@@ -1,0 +1,40 @@
+//////////////
+// MODULES //
+/////////////
+
+body{
+  background: transparent;
+}
+
+// Spinner
+.activity-indicator {
+
+  .vertical-align;
+  display:inline-block;
+  margin: 0 auto !important;
+
+  &__wrapper {
+    background: rgba(0,0,0,.25);
+    border-radius: 6px;
+    left: ~'calc(50% - 50px)';
+    margin: auto;
+    text-align:center;
+    .size(100px, 100px);
+    .vertical-align;
+    z-index:999999;
+  }
+}
+
+// Main Wrapper
+.si-wrapper{
+  margin: 0px auto;
+  overflow: hidden;
+  position: relative;
+  .size(@main-width, @main-height);
+
+  &__main{
+    overflow: hidden;
+    position: relative;
+    .size(100%, 100%);
+  }
+}
