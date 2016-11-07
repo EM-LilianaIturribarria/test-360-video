@@ -694,13 +694,19 @@
     };
 
     function link(scope, element, attrs) {
-      var video = videojs('si-video-360');
+      var video = window.player = videojs('si-video-360');
       var api = scope.api;
       var ready = $q.defer();
       var firstPlay = true;
       var assetDuration = 0;
       var quartiles = {};
       var broadcasterQuartile = [];
+
+      function isMobile() {
+        var check = false;
+        (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
+        return check;
+      }
       
       angular.extend(api, {
         'onVideoReady' : function(callback) {
@@ -719,9 +725,27 @@
         }
       });
 
+      if(isMobile()){
+        execPanorama();
+      }
+
+      function execPanorama(){
+
+        video.panorama({
+          clickToToggle: (!isMobile()),
+          autoMobileOrientation: true,
+          VREnable: isMobile(),
+          callback: function(){}
+        });
+
+        api.callback();
+      }
+
       video.on('canplaythrough', function() {
         video.panorama({
-          clickAndDrag: true,
+          clickToToggle: (!isMobile()),
+          autoMobileOrientation: true,
+          VREnable: isMobile(),
           callback: function(){
 
             $timeout(function(){
@@ -734,6 +758,10 @@
       video.on('pause', function() {
         trackGAEvents.record('Video', 'Pause');
         trackEAEvents.record('Video', 'Pause');
+      });
+
+      video.on('VRModeOn', function(){
+        video.controlBar.fullscreenToggle.trigger('tap');
       });
 
       video.on('play', function() {
@@ -982,6 +1010,13 @@
         }
       }
     };
+
+    function isMobile() {
+      var check = false;
+      (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
+      return check;
+    }
+
     // 'preload' object that holds
     // defs map and promises array.
     // ADD any promise to preload.promises
@@ -1013,6 +1048,12 @@
       vm.app.ready = true;
       preload.defs.video.resolve();
     };
+
+    // if( isMobile() ){
+    //   alert(vm.app.videojs.api.forceInit);
+    //   vm.app.videojs.api.forceInit();
+    //   vm.onVideoReady();
+    // }
 
     // Do something on video ended
     vm.onVideoComplete = function(){
@@ -1055,5 +1096,5 @@
 
 angular.module("app").run(["$templateCache", function($templateCache) {$templateCache.put("index.html","<!doctype html>\n<html>\n  <head>\n    <meta charset=\"utf-8\">\n    <title>EV SI IFRAME</title>\n    <meta name=\"description\" content=\"\">\n    <meta name=\"viewport\" content=\"width=device-width\">\n    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->\n\n    <!-- build:css({.tmp/serve,app}) styles/vendor.css -->\n    <!-- bower:css -->\n    <!-- run `gulp inject` to automatically populate bower styles dependencies -->\n    <!-- endbower -->\n    <!-- endbuild -->\n\n    <!-- build:css({.tmp/serve,app}) styles/app.css -->\n    <!-- inject:css -->\n    <!-- css files will be automatically insert here -->\n    <!-- endinject -->\n    <!-- endbuild -->\n  </head>\n  <body>\n    <!--[if lt IE 10]>\n      <p class=\"browsehappy\">You are using an <strong>outdated</strong> browser. Please <a href=\"http://browsehappy.com/\">upgrade your browser</a> to improve your experience.</p>\n    <![endif]-->\n\n	<div class=\"si-wrapper\">\n        <si-ai></si-ai>\n        <div ng-show=\"vm.app.ready\" class=\"si-wrapper__main\" ng-view></div>\n    </div>\n\n    <!-- GA Script -->\n	<script>\n	(function(i,s,o,g,r,a,m){i[\'GoogleAnalyticsObject\']=r;i[r]=i[r]||function(){\n	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),\n	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)\n	})(window,document,\'script\',\'//www.google-analytics.com/analytics.js\',\'ga\');\n	</script>\n    <!-- End GA Script -->\n\n    <!-- Origin External API Script -->\n    <!-- <script src=\"//management.originplatform.com/js/libs/amd/OriginExternalAPI.js\"></script> -->\n    <script src=\"https://secureassets.evolvemediallc.com/js/libs/amd/OriginExternalAPI.js\"></script>\n    <!-- End Origin External API Script -->\n\n    <!-- build:js(app) scripts/vendor.js -->\n    <!-- bower:js -->\n    <!-- run `gulp inject` to automatically populate bower script dependencies -->\n    <!-- endbower -->\n    <!-- endbuild -->\n\n    <!-- build:js({.tmp/serve,.tmp/partials,app}) scripts/app.js -->\n    <!-- inject:js -->\n    <!-- js files will be automatically insert here -->\n    <!-- endinject -->\n\n    <!-- inject:partials -->\n    <!-- angular templates will be automatically converted in js and inserted here -->\n    <!-- endinject -->\n    <!-- endbuild -->\n\n  </body>\n</html>\n");
 $templateCache.put("scripts/core/main.html","<!-- BEGIN VideoJS Directive -->\n<si-video-js api=\"vm.app.videojs.api\" video-src=\"../assets/videos/video.mp4\"></si-video-js>\n<!-- END VideoJS Directive -->");
-$templateCache.put("scripts/videojs/videojs.html","<div class=\"si-wrapper__main__videojs\">\n  <video videojs id=\"si-video-360\" class=\"video-js vjs-default-skin\" controls preload=\"auto\" width=\"320\" height=\"420\" crossorigin=\"anonymous\">\n    <source src=\"assets/videos/video.mp4\" type=\"video/mp4\">\n    <p class=\"vjs-no-js\">\n      Your browser does not support HTML5 video.\n    </p>\n  </video>\n</div>");
+$templateCache.put("scripts/videojs/videojs.html","<div class=\"si-wrapper__main__videojs\">\n  <video id=\"si-video-360\" class=\"video-js vjs-default-skin\" controls preload=\"auto\" width=\"320\" height=\"420\" crossorigin=\"anonymous\">\n    <source src=\"assets/videos/video.mp4\" type=\"video/mp4\">\n    <p class=\"vjs-no-js\">\n      Your browser does not support HTML5 video.\n    </p>\n  </video>\n</div>");
 $templateCache.put("index.html","<!doctype html>\n<html>\n  <head>\n    <meta charset=\"utf-8\">\n    <title>EV SI IFRAME</title>\n    <meta name=\"description\" content=\"\">\n    <meta name=\"viewport\" content=\"width=device-width\">\n    <!-- Place favicon.ico and apple-touch-icon.png in the root directory -->\n\n    <!-- build:css({.tmp/serve,app}) styles/vendor.css -->\n    <!-- bower:css -->\n    <link rel=\"stylesheet\" href=\"../bower_components/angular-toastr/dist/angular-toastr.css\">\n    <link rel=\"stylesheet\" href=\"../bower_components/animate.css/animate.css\">\n    <link rel=\"stylesheet\" href=\"../bower_components/videojs/dist/video-js/video-js.css\">\n    <!-- endbower -->\n    <!-- endbuild -->\n\n    <!-- build:css({.tmp/serve,app}) styles/app.css -->\n    <!-- inject:css -->\n    <link rel=\"stylesheet\" href=\"styles/index.css\">\n    <!-- endinject -->\n    <!-- endbuild -->\n  </head>\n  <body>\n    <!--[if lt IE 10]>\n      <p class=\"browsehappy\">You are using an <strong>outdated</strong> browser. Please <a href=\"http://browsehappy.com/\">upgrade your browser</a> to improve your experience.</p>\n    <![endif]-->\n\n	<div class=\"si-wrapper\">\n        <si-ai></si-ai>\n        <div ng-show=\"vm.app.ready\" class=\"si-wrapper__main\" ng-view></div>\n    </div>\n\n    <!-- GA Script -->\n	<script>\n	(function(i,s,o,g,r,a,m){i[\'GoogleAnalyticsObject\']=r;i[r]=i[r]||function(){\n	(i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),\n	m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)\n	})(window,document,\'script\',\'//www.google-analytics.com/analytics.js\',\'ga\');\n	</script>\n    <!-- End GA Script -->\n\n    <!-- Origin External API Script -->\n    <!-- <script src=\"//management.originplatform.com/js/libs/amd/OriginExternalAPI.js\"></script> -->\n    <script src=\"https://secureassets.evolvemediallc.com/js/libs/amd/OriginExternalAPI.js\"></script>\n    <!-- End Origin External API Script -->\n\n    <!-- build:js(app) scripts/vendor.js -->\n    <!-- bower:js -->\n    <script src=\"../bower_components/angular/angular.js\"></script>\n    <script src=\"../bower_components/jquery/jquery.js\"></script>\n    <script src=\"../bower_components/angular-resource/angular-resource.js\"></script>\n    <script src=\"../bower_components/angular-cookies/angular-cookies.js\"></script>\n    <script src=\"../bower_components/angular-sanitize/angular-sanitize.js\"></script>\n    <script src=\"../bower_components/angular-route/angular-route.js\"></script>\n    <script src=\"../bower_components/angular-animate/angular-animate.js\"></script>\n    <script src=\"../bower_components/angularytics/dist/angularytics.min.js\"></script>\n    <script src=\"../bower_components/spin.js/spin.js\"></script>\n    <script src=\"../bower_components/angular-spinner/angular-spinner.js\"></script>\n    <script src=\"../bower_components/angular-bootstrap/ui-bootstrap-tpls.js\"></script>\n    <script src=\"../bower_components/malarkey/dist/malarkey.min.js\"></script>\n    <script src=\"../bower_components/angular-toastr/dist/angular-toastr.tpls.js\"></script>\n    <script src=\"../bower_components/moment/moment.js\"></script>\n    <script src=\"../bower_components/underscore/underscore.js\"></script>\n    <script src=\"../bower_components/three.js/three.min.js\"></script>\n    <script src=\"../bower_components/videojs/dist/video-js/video.js\"></script>\n    <!-- endbower -->\n    <!-- endbuild -->\n\n    <!-- build:js({.tmp/serve,.tmp/partials,app}) scripts/app.js -->\n    <!-- inject:js -->\n    <script src=\"scripts/common/common.module.js\"></script>\n    <script src=\"scripts/common/services/trackGA-events.service.js\"></script>\n    <script src=\"scripts/common/services/trackEA-events.service.js\"></script>\n    <script src=\"scripts/common/services/preloader.service.js\"></script>\n    <script src=\"scripts/common/services/preloader.js\"></script>\n    <script src=\"scripts/common/services/origin.api.js\"></script>\n    <script src=\"scripts/common/services/evolve.analytics.js\"></script>\n    <script src=\"scripts/common/directives/si-tracking.directive.js\"></script>\n    <script src=\"scripts/common/directives/si-activity-indicator.directive.js\"></script>\n    <script src=\"scripts/videojs/videojs.module.js\"></script>\n    <script src=\"scripts/videojs/videojs.directive.js\"></script>\n    <script src=\"scripts/videojs/videojs.controller.js\"></script>\n    <script src=\"scripts/videojs/videojs-panorama.v4.min.js\"></script>\n    <script src=\"scripts/core/core.module.js\"></script>\n    <script src=\"scripts/core/config.js\"></script>\n    <script src=\"scripts/core/app.controller.js\"></script>\n    <script src=\"scripts/app.module.js\"></script>\n    <!-- endinject -->\n\n    <!-- inject:partials -->\n    <!-- angular templates will be automatically converted in js and inserted here -->\n    <!-- endinject -->\n    <!-- endbuild -->\n\n  </body>\n</html>\n");}]);
